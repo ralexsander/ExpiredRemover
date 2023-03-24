@@ -1,6 +1,6 @@
 # ExpiredRemover
 
-This project is designed to automatically delete files that have expired based on a specified policy. The policy can be defined by the user.
+The `expiredRemover` class is a Java command-line application that provides a user-friendly and flexible solution for deleting old files based on specified criteria. The class can be executed from the command line and is designed to be easy to configure and use. It allows users to specify rules for selecting files to be removed, such as file age, file name and extension.
 
 ## Requirements
 - Java 11 or higher
