@@ -1,13 +1,16 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS info.picocli:picocli:4.7.1
 //DEPS net.sf.jasperreports:jasperreports:6.3.1
+//DEPS net.sf.barcode4j:barcode4j:2.1
 //JAVA 11
 
 import java.io.File;
 import java.util.concurrent.Callable;
 
-import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.xml.JRXmlWriter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -51,16 +54,24 @@ class jasperTools implements Callable<Integer> {
 		return 0;
 	}	//	call
 
-	private void processFile (File file) throws JRException {
+	private void processFile (File file) throws Exception {
 		String fileName = file.getName();
-		JasperCompileManager.compileReportToFile(fileName, fileName.replace(".jrxml", ".jasper"));
+
+		if (fileName.endsWith(".jrxml"))
+			JasperCompileManager.compileReportToFile(fileName, fileName.replace(".jrxml", ".jasper"));
+		else if (fileName.endsWith(".jasper")) {
+			JasperReport report = (JasperReport) JRLoader.loadObject(file);
+        	JRXmlWriter.writeReport(report, fileName.replace(".jasper", ".jrxml"), "UTF-8");
+		}
+		else
+			throw new Exception ("File not supported: " + fileName);
 	}	//	processFile
 
-	private void processFolder (File folder) throws JRException {
+	private void processFolder (File folder) throws Exception {
 		System.out.println("processing: " + folder);
 		for (File file : folder.listFiles()) {
 			String fileName = file.getName();
-			if (file.isFile() && fileName.endsWith(".jrxml"))
+			if (file.isFile() && (fileName.endsWith(".jasper") || fileName.endsWith(".jrxml")))
 				processFile(file);
 			else if (file.isDirectory())
 				processFolder(file);
